@@ -40,7 +40,7 @@ population_size = 1000000
 # assign different weights to each record
 importance_weights = np.random.exponential(scale=10, size=population_size)
 
-# 0.01% of the population is a 'positive' example
+# 1% of the population is a 'positive' example
 is_positive = np.random.random(population_size) < 0.01
 
 # create some scores for each record where the score is correlated
@@ -51,7 +51,7 @@ scores[is_positive] = np.random.normal(loc=2.9, scale=0.3,
 
 scores[~is_positive] = np.random.normal(loc=0.8, scale=1.0,
                                         size=(~is_positive).sum())
-scores -= scores.min()
+scores -= (scores.min() - 1)
 
 sample_index, sample_weights = ml_sampler.biased_sample(
   biases=scores,
