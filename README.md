@@ -10,15 +10,15 @@ A typical example of this is probability proportionate to size (PPS) sampling. H
 When fighting spam, one question that is useful to answer is 'What is the overall prevalence of spam within the ecosystem?'. As we drive the overall prevalence of spam to zero we encounter some interesting measurement challenges:
 * We review these items manually and thus we spend most of our time looking at good things (wasted effort).
 * We may rely on the spam samples to make decisions about how to best prioritize. More spam examples helps us be more effective. A low overall prevalence means we have few examples (false negatives) to inspect.
-* The error bars associated with the sampling method are large relative to the estimated %. E.g. 1% (+/- 0.5%) vs 20% +/- 0.5%). Reducing the error bars associated with the sample helps us to be more confident in the decisions we make.
+* The error bars associated with the sampling method are large relative to the estimated percent. E.g. 1% (+/- 0.5%) vs 20% +/- 0.5%). Reducing the error bars associated with the sample helps us to be more confident in the decisions we make. This is especially important when there are large class imbalances.
 
 # ml_sampler - Benefits
- * Can significantly reduce the sample variance and increase the number of 'interesting' items sampled.
+ * Can significantly reduce the sample variance and increase the number of 'interesting' items sampled. 
  * Produces unbiased estimates for the sampled population.
  * Implemented leveraging existing python libraries (scipy & numpy).
 
 ## Demonstration
-We demonstrate three different methods for taking samples. In this scenario we are interested in understanding the percent of 'positive' examples in the parent population. Each method has distinct properties that we will study. We use a model that classifies 'positive' instances with some known ROC AUC performance (higher ROC AUC indicates a better model). We will demonstrate how each method behaves as we model performance is changed. See the [comparison of various bias methods](https://github.com/facebookincubator/ml_sampler/blob/master/examples/bias_comparison.ipynb) for more details on this scenario. 
+We demonstrate three different methods for taking samples. In this scenario we are interested in understanding the percent of 'positive' examples in the parent population. Each method has distinct properties that we will study. We use a model that classifies 'positive' instances with some known ROC AUC performance (higher ROC AUC indicates a better model). We will demonstrate how each method behaves as model performance is changed. See the [comparison of various bias methods](https://github.com/facebookincubator/ml_sampler/blob/master/examples/bias_comparison.ipynb) for more details on this scenario. 
 
 We consider the following sampling methods:
  * PPS Sample - Typical Probability Proportionate to Size sampling. It does not benefit from improvements in model performance. This is used as a comparison point for the other two methods. Ideally we should match or beat the PPS method in terms of percent of positive elements sampled and with the error bars around the prevalence estimate.
