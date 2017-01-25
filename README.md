@@ -97,6 +97,8 @@ In many situations - this can reduce the error (bars) associated with taking the
 ## Further Information
 Please see our [paper](https://github.com/facebookincubator/ml_sampler/blob/master/ml_sampler.pdf) or the notebooks in the [examples/](https://github.com/facebookincubator/ml_sampler/tree/master/examples) directory.
 
+This repository is joint work by Spencer Beecher and Emanuel Strauss. Special thanks to Daniel Olmedilla.
+
 See the CONTRIBUTING file for how to help out.
 
 ## License
