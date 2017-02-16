@@ -36,18 +36,27 @@ def sample_stats(views, is_spam, scores, num_samples, bias_func=None):
         def bias_func(x):
             return x
 
-    index, weights = ml_sampler.biased_sample(
+    index, p_sample = ml_sampler.biased_sample(
         biases=bias_func(scores),
         weights=views,
         num_samples=num_samples,
     )
 
+    sample_weights = views[index]
+    sample_is_spam = is_spam[index]
+
+    est_pos_volume = ml_sampler.estimator(
+        sample_weights,
+        p_sample,
+        sample_is_spam,
+    )
+
     # H-T Estimator of prevalence
-    prevalence = weights[is_spam[index]].sum() / views.sum() * 100.0
+    prevalence = est_pos_volume / views.sum() * 100.0
 
     # Percent of sampled entries that are positive. If this is greater
     #  than prevalence then we have over-sampled positive examples.
-    sampled_positive_percent = is_spam[index].sum() * 100.0 / len(index)
+    sampled_positive_percent = sample_is_spam.mean() * 100.0
 
     return {
         'prevalence': prevalence,

@@ -55,19 +55,23 @@ scores[~is_positive] = np.random.normal(loc=0.8, scale=1.0,
 scores -= scores.min() 
 scores += 0.01
 
-sample_index, sample_weights = ml_sampler.biased_sample(
+sample_index, p_sample = ml_sampler.biased_sample(
   biases=scores,
   weights=importance_weights,
   num_samples=3000
 )
 
 # 1.0%
-prevalence = importance_weights[is_positive].sum() * 100.0 / importance_weights.sum()
+positive_volume = importance_weights[is_positive].sum() 
 
-positive_sampled = is_positive[sample_index]
+sample_importance_weights = importance_weights[sample_index]
+
+est_positive_volume = ml_sampler.estimator(sample_importance_weights, p_sample, is_positive[sample_index])
+
+positive_prevalence = positive_volume * 100.0 / importance_weights.sum()
 
 # About 1.0% - we still have an unbiased estimate of prevalence
-est_prevalence = sample_weights[positive_sampled].sum()  / importance_weights.sum() * 100.0
+est_prevalence = est_positive_volume  * 100.0 / importance_weights.sum() 
 
 # For this example - positive_sampled.mean() * 100 is typically 1.5x > est_prevalence
 # this means that we are able to successfully over-sample positive examples 

@@ -75,19 +75,21 @@ def interpolated_pdf_reciprocal(scores, bins=None, merge_threshold=0.005):
     """
 
     if bins is None:
-        num_bins = 10
         # reasonable default
-        bins = np.linspace(scores.min(), scores.max(), num_bins)
+        bins = np.linspace(scores.min(), scores.max(), 10)
 
     if merge_threshold:
         bins = _merge_infrequent_bins(scores, bins, merge_threshold)
 
     counts, bins = np.histogram(scores, bins=bins)
 
-    bins = [(bins[i] + bins[i - 1]) / 2.0 for i in range(1, len(bins))]
+    bin_posts = [(bins[i] + bins[i - 1]) / 2.0 for i in range(1, len(bins))]
 
-    f = scipy.interpolate.interp1d(
-        bins, counts, bounds_error=False, fill_value=(counts[0], counts[-1]))
+    if len(bin_posts) <= 1:
+        return np.ones(len(scores))
+
+    f = scipy.interpolate.interp1d(bin_posts, counts, bounds_error=False,
+                                   fill_value=(counts[0], counts[-1]))
 
     pdf_values = 1.0 / f(scores)
 
@@ -112,14 +114,16 @@ def histogram_reciprocal(scores, bins=None, merge_threshold=0.005):
     """
 
     if bins is None:
-        num_bins = 10
         # reasonable default
-        bins = np.linspace(scores.min(), scores.max(), num_bins)
+        bins = np.linspace(scores.min(), scores.max(), 10)
 
     if merge_threshold:
         bins = _merge_infrequent_bins(scores, bins, merge_threshold)
 
     counts, bins = np.histogram(scores, bins=bins)
+
+    if len(bins) <= 1:
+        return np.ones(len(scores))
 
     index = np.searchsorted(bins, scores, side='left') - 1
 

@@ -27,30 +27,10 @@ def biased_sample(biases, weights, num_samples):
             positive.
         num_samples: Number of samples to take.
 
-    Returns: A tuple of (sampled_index, weights).
+    Returns: A tuple of (sampled_index, weights, p_sample).
         sampled_ids: Indicates the entries that were sampled. np.array of length
         @num_samples.
-        weights: Weight for each record specified in sampled_ids. This
-            gives the Horvitz-Thompson Estimator for the sample. np.array of
-            length @num_samples.
-
-    Example:
-
-        # Variables:
-        #    weights - np.array specifying the size/weight of each record.
-        #    is_positive - np.array specifying if the record is positive.
-        #    biases - np.array specifying the bias for each record.
-
-        sample_index, sample_weights = biased_sample(biases, 1000, weights)
-
-        # the estimate of the volume of 'positive' things in the population
-        sample_weights[is_positive[sample_index]].sum()
-
-        # the estimate of the percent of 'positive' things in the population
-        sample_weights[is_positive[sample_index]].sum() / weights.sum()
-
-        # the percent of positive examples sampled
-        is_positive[sample_index].mean() * 100.0
+        p_sample: Probability that each record was sampled.
 
     Notes:
         *If bias and weight arrays are correlated then the above frequencies
@@ -76,11 +56,43 @@ def biased_sample(biases, weights, num_samples):
     sampled_ids = np.random.choice(len(biases), min(num_samples, len(biases)),
                                    p=p_sample, replace=True)
 
-    # This gives the Horvitz-Thompson Estimator
-    # sum up weights to get to the percent of prevalence
-    #  weights[is_interesting].sum() == the volume of interesting things
-    #  in other words this is the estimate of weight[is_interesting].sum()
-    sampled_weights = (weights[sampled_ids] / p_sample[sampled_ids])
-    sampled_weights = sampled_weights / num_samples
+    # we take num_samples so each element has an increased probability of
+    # samples to be taken
+    p_sample = p_sample * num_samples
 
-    return sampled_ids, sampled_weights
+    return sampled_ids, p_sample[sampled_ids]
+
+
+def estimator(weights, p_sample, is_positive):
+    '''Horvitz-Thompson Estimator
+    Args:
+        weights: numpy.array of weights assocated with the records.
+            weights * is_positive are typcially refered to as y in the
+            literature.
+        p_sample: numpy.array of the probability the records were sampled.
+            Typically refered to as pi in the literature.
+        is_positve: numpy.array of boolean values indicating the positive
+            records. weights * is_positive are typcially refered to as y in the
+            literature.
+    Returns:
+        The extimated value for the larger population.
+    '''
+    return (weights / p_sample)[is_positive].sum()
+
+
+def estimated_variance(weights, p_sample, is_positive):
+    '''The estimated variance of the Horvitz-Thompson estimator
+    Args:
+        weights: numpy.array of weights assocated with the records.
+            weights * is_positive are typcially refered to as y in the
+            literature.
+        p_sample: numpy.array of the probability the records were sampled.
+            Typically refered to as pi in the literature.
+        is_positve: numpy.array of boolean values indicating the positive
+            records. weights * is_positive are typcially refered to as y in the
+            literature.
+    Returns:
+        The extimated variance for the larger population.
+    '''
+    vals = (1 - p_sample) / (p_sample**2) * (weights**2)
+    return vals[is_positive].sum()

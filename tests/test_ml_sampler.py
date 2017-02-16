@@ -46,37 +46,44 @@ class MLSamplerTest(unittest.TestCase):
 
     def test_sample(self):
 
-        sample_index, sample_weights = ml_sampler.biased_sample(
+        sample_index, p_sample = ml_sampler.biased_sample(
             biases=np.ones(self.size),
             weights=self.importance,
             num_samples=self.num_samples
         )
 
-        est_prevalence = sample_weights[self.is_positive[sample_index]].sum()
+        est_prevalence = ml_sampler.estimator(self.importance[sample_index],
+                                              p_sample,
+                                              self.is_positive[sample_index])
         est_prevalence /= self.importance.sum()
         self.equal_assert(est_prevalence)
 
     def test_pdf(self):
 
-        sample_index, sample_weights = ml_sampler.biased_sample(
+        sample_index, p_sample = ml_sampler.biased_sample(
             biases=ml_sampler.interpolated_pdf_reciprocal(self.scores),
             weights=self.importance,
             num_samples=self.num_samples
         )
 
-        est_prevalence = sample_weights[self.is_positive[sample_index]].sum()
+        est_prevalence = ml_sampler.estimator(self.importance[sample_index],
+                                              p_sample,
+                                              self.is_positive[sample_index])
         est_prevalence /= self.importance.sum()
         self.equal_assert(est_prevalence)
 
     def test_hist(self):
 
-        sample_index, sample_weights = ml_sampler.biased_sample(
+        sample_index, p_sample = ml_sampler.biased_sample(
             biases=ml_sampler.histogram_reciprocal(self.scores),
             weights=self.importance,
             num_samples=self.num_samples
         )
 
-        est_prevalence = sample_weights[self.is_positive[sample_index]].sum()
+        est_prevalence = ml_sampler.estimator(self.importance[sample_index],
+                                              p_sample,
+                                              self.is_positive[sample_index])
+
         est_prevalence /= self.importance.sum()
         self.equal_assert(est_prevalence)
 
@@ -90,12 +97,14 @@ class MLSamplerTest(unittest.TestCase):
             bin_weights=np.linspace(1, 10, 10)
         )
 
-        sample_index, sample_weights = ml_sampler.biased_sample(
+        sample_index, p_sample = ml_sampler.biased_sample(
             biases=bias,
             weights=self.importance,
             num_samples=self.num_samples
         )
 
-        est_prevalence = sample_weights[self.is_positive[sample_index]].sum()
+        est_prevalence = ml_sampler.estimator(self.importance[sample_index],
+                                              p_sample,
+                                              self.is_positive[sample_index])
         est_prevalence /= self.importance.sum()
         self.equal_assert(est_prevalence)
