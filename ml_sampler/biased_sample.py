@@ -45,10 +45,10 @@ def biased_sample(biases, weights, num_samples):
     weights = np.array(weights)
 
     if np.sum(weights <= 0) > 0:
-        raise ValueError('All weights must be positive')
+        raise ValueError('All weights must be strictly positive')
 
     if np.sum(biases <= 0) > 0:
-        raise ValueError('All biases must be positive')
+        raise ValueError('All biases must be strictly positive')
 
     p_sample = biases * weights
     p_sample = p_sample / p_sample.sum()
