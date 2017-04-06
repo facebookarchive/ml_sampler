@@ -56,7 +56,7 @@ def _merge_infrequent_bins(scores, bins, tolerance):
     return bins[posts_to_keep]
 
 
-def interpolated_pdf_reciprocal(scores, bins=None, merge_threshold=0.005):
+def interpolated_pdf_reciprocal(scores, bins=None, merge_threshold=0.01):
     """Attempts to take equal samples from each bin. It does this by
     constructing an (interpolated) PDF from @scores and then returning
     1 / pdf(score).
@@ -96,7 +96,7 @@ def interpolated_pdf_reciprocal(scores, bins=None, merge_threshold=0.005):
     return pdf_values
 
 
-def histogram_reciprocal(scores, bins=None, merge_threshold=0.005):
+def histogram_reciprocal(scores, bins=None, merge_threshold=0.01):
     """Attempts to take equal samples from each bin. It does this by
     constructing a histogram from @scores and then returning
     1 / histogram_value(score).
