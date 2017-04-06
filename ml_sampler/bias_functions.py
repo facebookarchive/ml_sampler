@@ -40,14 +40,14 @@ def _merge_infrequent_bins(scores, bins, tolerance):
 
     posts_to_remove = []
     last_merged = False
-    for ind in range(0, num_bins - 1):
+    for ind in range(num_bins - 1):
         if not last_merged and counts[ind] < tolerance:
             posts_to_remove.append(ind + 1)
             last_merged = True
         else:
             last_merged = False
 
-    posts_to_keep = set(range(0, num_bins + 1)).difference(posts_to_remove)
+    posts_to_keep = set(range(num_bins + 1)).difference(posts_to_remove)
     posts_to_keep = list(posts_to_keep)
 
     if bins.size != bins[posts_to_keep].size:
