@@ -56,15 +56,13 @@ def biased_sample(biases, weights, num_samples):
     sampled_ids = np.random.choice(len(biases), min(num_samples, len(biases)),
                                    p=p_sample, replace=True)
 
-    # we take num_samples so each element has an increased probability of
-    # samples to be taken
-    p_sample = p_sample * num_samples
+    p_sample = p_sample
 
     return sampled_ids, p_sample[sampled_ids]
 
 
 def estimator(weights, p_sample, is_positive):
-    '''Horvitz-Thompson Estimator
+    '''Hansen-Hurwitz Estimator
     Args:
         weights: numpy.array of weights assocated with the records.
             weights * is_positive are typcially refered to as y in the
@@ -77,11 +75,12 @@ def estimator(weights, p_sample, is_positive):
     Returns:
         The extimated value for the larger population.
     '''
-    return (weights / p_sample)[is_positive].sum()
+    n = weights.shape[0]
+    return (weights / p_sample)[is_positive].sum() / n
 
 
 def estimated_variance(weights, p_sample, is_positive):
-    '''The estimated variance of the Horvitz-Thompson estimator
+    '''The estimated variance of the Hansen-Hurwitz estimator
     Args:
         weights: numpy.array of weights assocated with the records.
             weights * is_positive are typcially refered to as y in the
@@ -94,5 +93,7 @@ def estimated_variance(weights, p_sample, is_positive):
     Returns:
         The extimated variance for the larger population.
     '''
-    vals = (1 - p_sample) / (p_sample**2) * (weights**2)
-    return vals[is_positive].sum()
+    n = weights.shape[0]
+    T = estimator(weights, p_sample, is_positive)
+    vals = (weights / p_sample * is_positive - T)**2
+    return vals.sum() / n / (n - 1)
