@@ -12,6 +12,7 @@ from __future__ import unicode_literals
 from ml_sampler.biased_sample import biased_sample
 from ml_sampler.biased_sample import estimator
 from ml_sampler.biased_sample import estimated_variance
+from ml_sampler.biased_sample import estimated_confidence_interval
 from ml_sampler.bias_functions import interpolated_pdf_reciprocal
 from ml_sampler.bias_functions import histogram_reciprocal
 from ml_sampler.bias_functions import bin_weights_raw

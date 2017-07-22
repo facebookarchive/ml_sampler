@@ -15,7 +15,7 @@ import pandas as pd
 import numpy as np
 
 
-def sample_stats(views, is_spam, scores, num_samples, bias_func=None):
+def sample_stats(views, is_spam, biases, num_samples):
     """Output some statistics associated with taking a sample.
     Args:
         is_positive: numpy.array of values indicating if the record is a
@@ -32,12 +32,8 @@ def sample_stats(views, is_spam, scores, num_samples, bias_func=None):
             positive.
     """
 
-    if bias_func is None:
-        def bias_func(x):
-            return x
-
     index, p_sample = ml_sampler.biased_sample(
-        biases=bias_func(scores),
+        biases=biases,
         weights=views,
         num_samples=num_samples,
     )
@@ -51,46 +47,57 @@ def sample_stats(views, is_spam, scores, num_samples, bias_func=None):
         sample_is_spam,
     )
 
-    # H-T Estimator of prevalence
-    prevalence = est_pos_volume / views.sum() * 100.0
+    confidence_interval = ml_sampler.estimated_confidence_interval(
+        sample_weights,
+        p_sample,
+        sample_is_spam,
+    )
+
+    # H-H Estimator of prevalence
+    est_prevalence = est_pos_volume / views.sum() * 100.0
+    confidence_interval = confidence_interval / views.sum() * 100.0
+
+    true_prevalence = (views * is_spam).sum() / views.sum() * 100.0
+
+    coverage = confidence_interval - true_prevalence
+
 
     # Percent of sampled entries that are positive. If this is greater
     #  than prevalence then we have over-sampled positive examples.
     sampled_positive_percent = sample_is_spam.mean() * 100.0
 
     return {
-        'prevalence': prevalence,
+        'true_prevalence': true_prevalence,
+        'est_prevalence': est_prevalence,
         'sampled_positive_percent': sampled_positive_percent,
+        'lower_bound': confidence_interval[0],
+        'upper_bound': confidence_interval[1],
+        'bound_width': np.ptp(confidence_interval),
+        'coverage': coverage[0] <= 0 and coverage[1] >= 0
     }
 
 
-def simulated_sample_stats(views, is_spam, scores, num_samples, bias_func=None,
+def simulated_sample_stats(views, is_spam, biases, num_samples,
                            num_iterations=4000):
-    """Take a number of samples, analyze the percentiles to provide approximate
-    95% confidence intervals for the the various metrics reported in sample_stats.
+    """Take a number of samples, analyze
 
     Args:
         is_positive: numpy.array of values indicating if the record is a
             positive class.
         scores: numpy.array of values indicating the model score.
         num_samples: Number of samples to take.
-        bias_func: Function to apply to @scores. Serves to bias the sampling
-            procedure.
 
     Returns:
-        The estimate and 95% confidence interval of the percentage of items that are
-        positive in the overall population.
+        DataFrame(true_prevalence, est_prevalence, positive_percent, ci_lower_bound, ci_upper_bound, bound_width, coverage)
 
     """
     result = []
 
     for _ in range(num_iterations):
-        r = sample_stats(views, is_spam, scores, num_samples, bias_func)
+        r = sample_stats(views, is_spam, biases, num_samples)
         result.append(r)
 
-    result = pd.DataFrame(result)
-
-    return result.quantile([0.025, 0.5, 0.975])
+    return pd.DataFrame(result)
 
 
 def get_auc(y_test, y_pred):

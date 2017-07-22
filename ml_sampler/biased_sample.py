@@ -97,3 +97,10 @@ def estimated_variance(weights, p_sample, is_positive):
     T = estimator(weights, p_sample, is_positive)
     vals = (weights / p_sample * is_positive - T)**2
     return vals.sum() / n / (n - 1)
+
+
+def estimated_confidence_interval(weights, p_sample, is_positive, z=1.96):
+    var = estimated_variance(weights, p_sample, is_positive)
+    stdev = np.sqrt(var)
+    est = estimator(weights, p_sample, is_positive)
+    return np.array([est - z * stdev, est + z*stdev])
