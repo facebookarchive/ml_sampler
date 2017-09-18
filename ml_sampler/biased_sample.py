@@ -12,7 +12,7 @@ from __future__ import unicode_literals
 import numpy as np
 
 
-def biased_sample(biases, weights, num_samples):
+def biased_sample(biases, weights, num_samples, with_replacement=True):
     """Take an weighted & based sample - then correct for the bias via
     weighting each sampled record.
 
@@ -26,6 +26,8 @@ def biased_sample(biases, weights, num_samples):
             in probability proportionate to size sampling. Entries must be
             positive.
         num_samples: Number of samples to take.
+        with_replacement: Default True, flag to determine if the sampling
+            is with replacement.
 
     Returns: A tuple of (sampled_index, weights, p_sample).
         sampled_ids: Indicates the entries that were sampled. np.array of length
@@ -52,11 +54,10 @@ def biased_sample(biases, weights, num_samples):
 
     p_sample = biases * weights
     p_sample = p_sample / p_sample.sum()
-
-    sampled_ids = np.random.choice(len(biases), min(num_samples, len(biases)),
-                                   p=p_sample, replace=True)
-
-    p_sample = p_sample
+    sampled_ids = np.random.choice(a=len(biases),
+                                    size=min(num_samples, len(biases)),
+                                    replace=with_replacement,
+                                    p=p_sample)
 
     return sampled_ids, p_sample[sampled_ids]
 
