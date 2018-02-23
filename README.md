@@ -1,4 +1,4 @@
-# ml_sampler - Model Assisted Sampling 
+# ml_sampler - Model Assisted Sampling
 Use machine learning to take 'better' samples!
 
 ## The Problem
@@ -27,12 +27,12 @@ When fighting spam, one question that is useful to answer is 'What is the overal
 * The error bars associated with the sampling method are large relative to the estimated percent. E.g. 1% (+/- 0.5%) vs 20% +/- 0.5%). Reducing the error bars associated with the sample helps us to be more confident in the decisions we make. This is especially important when there are large class imbalances.
 
 ## ml_sampler - Benefits
- * Can significantly reduce the sample variance and increase the number of 'interesting' items sampled. 
+ * Can significantly reduce the sample variance and increase the number of 'interesting' items sampled.
  * Produces unbiased estimates for the sampled population.
  * Implemented leveraging existing python libraries (scipy & numpy).
 
 ## Demonstration
-We demonstrate three different methods for taking samples. In this scenario we are interested in understanding the percent of 'positive' examples in the broader population. Each method has distinct properties that we will study. We use a model that classifies 'positive' instances with some known ROC AUC performance (higher ROC AUC indicates a better model). We will demonstrate how each method behaves as model performance is changed. See the [comparison of various bias methods](https://github.com/facebookincubator/ml_sampler/blob/master/examples/bias_comparison.ipynb) for more details on this scenario. 
+We demonstrate three different methods for taking samples. In this scenario we are interested in understanding the percent of 'positive' examples in the broader population. Each method has distinct properties that we will study. We use a model that classifies 'positive' instances with some known ROC AUC performance (higher ROC AUC indicates a better model). We will demonstrate how each method behaves as model performance is changed. See the [comparison of various bias methods](https://github.com/facebookincubator/ml_sampler/blob/master/examples/bias_comparison.ipynb) for more details on this scenario.
 
 We consider the following sampling methods:
  * PPS Sample - Typical Probability Proportionate to Size sampling. It does not benefit from improvements in model performance. This is used as a comparison point for the other two methods. Ideally we should match or beat the PPS method in terms of percent of positive elements sampled and with the error bars around the prevalence estimate.
@@ -54,10 +54,10 @@ population_size = 1000000
 impression_weights = np.random.exponential(scale=10, size=population_size)
 
 # some score that we magically assign
-scores = np.random.normal(scale=10, size=population_size) 
+scores = np.random.normal(scale=10, size=population_size)
 scores = [max(0.001, x) for x in scores] # scores need to be positive
 
-# in real life we would have to evaluate each sample manually or use an oricle
+# in real life we would have to evaluate each sample manually or use an oracle
 # in this example we are just going to make is_positve correlate with scores
 is_positive = (scores * np.random.normal(scale=10, size=population_size) ) > 100
 
@@ -67,13 +67,13 @@ sample_index, p_sample = ml_sampler.biased_sample(
   num_samples=3000
 )
 
-# in real life we would have to evaluate each sample manually or with an oricle
+# in real life we would have to evaluate each sample manually or with an oracle
 sample_is_positive = is_positive[sample_index]
 
 sample_impression_weights = impression_weights[sample_index]
 
-est_positive_volume = ml_sampler.estimator(sample_impression_weights, 
-                                           p_sample, 
+est_positive_volume = ml_sampler.estimator(sample_impression_weights,
+                                           p_sample,
                                            sample_is_positive)
 ```
 
@@ -90,14 +90,14 @@ ml_sampler requires numpy and scipy. Tested with numpy 1.11.2 and scipy 0.18.1.
 ```bash
 # clone ml_sampler
 cd ml_sampler
-pip install -r requirements.txt 
+pip install -r requirements.txt
 python setup.py install
 ```
 
 ## How ml_sampler works
-Suppose we have a classifier that can estimate the probability that a record will be 'interesting'. We can use this information to over-sample interesting things but to weight those things less for the purposes of the prevalence calculation. 
+Suppose we have a classifier that can estimate the probability that a record will be 'interesting'. We can use this information to over-sample interesting things but to weight those things less for the purposes of the prevalence calculation.
 
-In many situations - this can reduce the error (bars) associated with taking the sample while providing and unbiased estimate of the prevalence of 'interesting' things. 
+In many situations - this can reduce the error (bars) associated with taking the sample while providing and unbiased estimate of the prevalence of 'interesting' things.
 
 
 ## Further Information
