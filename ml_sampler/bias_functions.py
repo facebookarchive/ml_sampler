@@ -56,7 +56,9 @@ def _merge_infrequent_bins(scores, bins, tolerance):
     return bins[posts_to_keep]
 
 
-def interpolated_pdf_reciprocal(scores, bins=None, merge_threshold=0.01):
+def interpolated_pdf_reciprocal(
+    scores, bins=None, merge_threshold=0.01, histogram_weights=None
+):
     """Attempts to take equal samples from each bin. It does this by
     constructing an (interpolated) PDF from @scores and then returning
     1 / pdf(score).
@@ -70,6 +72,9 @@ def interpolated_pdf_reciprocal(scores, bins=None, merge_threshold=0.01):
             hurt performance of this method. Defaults to 0.01 which
             represents 1.0% of the population. Make this False to turn off.
             TODO: make merge_threshold d
+        histogram_weights: np.array of weights. Each value only contributes its
+            associated weight towards the bin counts in the histogram. The
+            default weights are np.ones()
 
     Returns: np.array of bias weights for each record
     """
@@ -78,10 +83,14 @@ def interpolated_pdf_reciprocal(scores, bins=None, merge_threshold=0.01):
         # reasonable default
         bins = np.linspace(scores.min(), scores.max(), 10)
 
+    if histogram_weights is None:
+        # set to unit histogram weights
+        histogram_weights = np.ones(len(scores))
+
     if merge_threshold:
         bins = _merge_infrequent_bins(scores, bins, merge_threshold)
 
-    counts, bins = np.histogram(scores, bins=bins)
+    counts, bins = np.histogram(scores, bins=bins, weights=histogram_weights)
 
     bin_posts = [(bins[i] + bins[i - 1]) / 2.0 for i in range(1, len(bins))]
 
@@ -96,7 +105,9 @@ def interpolated_pdf_reciprocal(scores, bins=None, merge_threshold=0.01):
     return pdf_values
 
 
-def histogram_reciprocal(scores, bins=None, merge_threshold=0.01):
+def histogram_reciprocal(
+    scores, bins=None, merge_threshold=0.01, histogram_weights=None
+):
     """Attempts to take equal samples from each bin. It does this by
     constructing a histogram from @scores and then returning
     1 / histogram_value(score).
@@ -109,6 +120,9 @@ def histogram_reciprocal(scores, bins=None, merge_threshold=0.01):
             of the overall population. Low population bins can significantly
             hurt performance of this method. Defaults to 0.01 which
             represents 1.0% of the population. Make this False to turn off.
+        histogram_weights: np.array of weights. Each value only contributes its
+            associated weight towards the bin counts in the histogram. The
+            default weights are np.ones()
 
     Returns: np.array of bias weights for each record
     """
@@ -116,6 +130,10 @@ def histogram_reciprocal(scores, bins=None, merge_threshold=0.01):
     if bins is None:
         # reasonable default
         bins = np.linspace(scores.min(), scores.max(), 10)
+
+    if histogram_weights is None:
+        # set to unit histogram weights
+        histogram_weights = np.ones(len(scores))
 
     if merge_threshold:
         bins = _merge_infrequent_bins(scores, bins, merge_threshold)
