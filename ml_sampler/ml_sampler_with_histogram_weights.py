@@ -9,6 +9,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
+from builtins import str
 from biased_sample import biased_sample
 from bias_functions import interpolated_pdf_reciprocal
 
